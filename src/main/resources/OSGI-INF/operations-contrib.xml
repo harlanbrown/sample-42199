@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<component name="org.nuxeo.sample.operations" version="1.0">
+
+  <require>org.nuxeo.ecm.core.automation.features.operations</require>
+
+  <extension target="org.nuxeo.ecm.core.operation.OperationServiceComponent" point="operations">
+    <operation class="org.nuxeo.sample.operations.CustomFileManagerImport" replace="true" />
+  </extension>
+
+</component>
