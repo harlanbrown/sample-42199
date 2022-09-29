@@ -87,14 +87,13 @@ public class CustomFileManagerImport {
 
     @OperationMethod
     public DocumentModel run(Blob blob) throws OperationException, IOException {
-        // do the import in a long-running transaction to avoid timeouts
-        TransactionHelper.commitOrRollbackTransaction();
-        TransactionHelper.startTransaction(IMPORT_TX_TIMEOUT_SEC);
         DocumentModel currentDocument = getCurrentDocument();
         String path = currentDocument.getPathAsString();
         FileImporterContext fileCreationContext;
 
         // check no persist criteria     (same criteria for firing the listener)
+        // remember that the doc doesn't exist at this point
+        // so the check has to happen on the blob being imported
         if (blob.getMimeType().startsWith("image")){
             fileCreationContext = FileImporterContext.builder(session, blob, path)
                                                      .overwrite(overwrite)
@@ -107,10 +106,13 @@ public class CustomFileManagerImport {
                                                      .mimeTypeCheck(!noMimeTypeCheck)
                                                      .build();
         }
+
         DocumentModel doc = fileManager.createOrUpdateDocument(fileCreationContext);
+
         if (doc.isDirty()) {
-          doc = doc.getId() == null ? session.createDocument(doc) : session.saveDocument(doc);
+            doc = doc.getId() == null ? session.createDocument(doc) : session.saveDocument(doc);
         }
+
         return doc;
     }
 
